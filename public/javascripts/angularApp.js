@@ -193,6 +193,7 @@ app.controller('MainCtrl', [
 		$scope.isLoggedIn = auth.isLoggedIn;
 		$scope.test = 'Hello World!';
 		$scope.posts = posts.posts;
+
 		$scope.addPost = function () {
 			if (!$scope.title || $scope.title === '')  {
 				return;
@@ -222,6 +223,9 @@ app.controller('MainCtrl', [
 			$scope.title = '';
 			$scope.link = '';
 		};
+		$scope.incrementDownvotes = function (post) {
+			posts.downvote(post);
+		};
 		$scope.incrementUpvotes = function (post) {
 			posts.upvote(post);
 		};
@@ -244,7 +248,6 @@ app.controller('AuthCtrl', [
 					$state.go('home');
 				});
 		};
-
 		$scope.logIn = function () {
 			auth.logIn($scope.user)
 				.error(function (error) {
@@ -289,6 +292,9 @@ app.controller('PostsCtrl', [
 
 			$scope.body = '';
 
+			$scope.incrementDownvotes = function (comment) {
+				posts.downvoteComment(post, comment);
+			};
 			$scope.incrementUpvotes = function (comment) {
 				posts.upvoteComment(post, comment);
 			};
