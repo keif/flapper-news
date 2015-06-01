@@ -1,3 +1,4 @@
+var debug = require('debug')('flapper-news:server');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -17,11 +18,11 @@ var mongoURI = 'mongodb://localhost:27017/news';
 var MongoDB = mongoose.connect(mongoURI).connection;
 
 MongoDB.on('error', function(err) {
-	console.log(err.message);
+	console.error(err.message);
 });
 
 MongoDB.once('open', function() {
-	console.log('mongodb connection open');
+	debug('mongodb connection open');
 });
 
 var routes = require('./routes/index');
