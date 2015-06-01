@@ -1,13 +1,25 @@
-body {
-	font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-	padding: 50px;
-}
-
-a {
-	color: #00B7FF;
-}
-
+/* icons */
 .glyphicon-thumbs-down,
 .glyphicon-thumbs-up {
 	cursor: pointer;
+}
+
+/* post display area */
+.delete {
+	float: right;
+}
+
+/* form submit area */
+.form-add-post,
+.form-add-login {
+	margin-top: 30px;
+}
+
+/* comment area */
+.comment {
+
+}
+.comment span {
+	font-size: 20px;
+	margin-left: 10px;
 }

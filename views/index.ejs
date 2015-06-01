@@ -23,22 +23,28 @@
 		</div>
 	</div>
 	<script type="text/ng-template" id="/home.html">
+	<!-- Template: Homepage -->
 	<div class="page-header">
 		<h1>Flapper News</h1>
 	</div>
 
+	<!-- show all posts, sorted by upvotes -->
 	<div ng-repeat="post in posts | orderBy:'-upvotes'">
-		<span class="glyphicon glyphicon-thumbs-up" ng-click="incrementUpvotes(post)"></span>{{post.upvotes}}
-		<span class="glyphicon glyphicon-thumbs-down" ng-click="incrementDownvotes(post)"></span>{{post.downvotes}}
+		<a ng-click="incrementUpvotes(post)"><span class="glyphicon glyphicon-thumbs-up"></span>{{post.upvotes}}</a>
+		<a ng-click="incrementDownvotes(post)"><span class="glyphicon glyphicon-thumbs-down"></span>{{post.downvotes}}</a>
 		<span style="font-size:20px; margin-left:10px;">
 			<a ng-show="post.link" href="{{post.link}}">{{post.title}}</a>
 			<span ng-hide="post.link">{{post.title}}</span>
 			<span ng-show="post.author">posted by <a>{{post.author}}</a> |</span>
 			<span><a href="#/posts/{{post._id}}">Comments</a></span>
+			<!-- Link for deleting post-->
+			<span class="delete" ng-show="isLoggedIn()" ng-click="deletePost(post)">
+				<a href="#"> Delete </a>
+			</span>
 		</span>
 	</div>
 
-	<form ng-submit="addPost()" ng-show="isLoggedIn()" style="margin-top:30px;">
+	<form class="form-add-post" ng-submit="addPost()" ng-show="isLoggedIn()">
 		<h3>Add a new post</h3>
 
 		<div class="form-group">
@@ -62,7 +68,7 @@
 		<span>{{ error.message }}</span>
 	</div>
 
-	<form ng-submit="logIn()" style="margin-top:30px;">
+	<form class="form-login" ng-submit="logIn()">
 		<h3>Log In</h3>
 
 		<div class="form-group">
@@ -81,12 +87,12 @@
 			<span ng-hide="post.link">{{post.title}}</span>
 		</h3>
 	</div>
-	<div ng-repeat="comment in post.comments | orderBy:'-upvotes'">
-		<span class="glyphicon glyphicon-thumbs-up" ng-click="incrementUpvotes(comment)"></span>
-		{{comment.upvotes}} - by {{comment.author}}
-		<span style="font-size:20px; margin-left:10px;">{{comment.body}}</span>
+	<div class="comment" ng-repeat="comment in post.comments | orderBy:'-upvotes'">
+		<a ng-click="incrementUpvotes(comment)"><span class="glyphicon glyphicon-thumbs-up"></span>{{comment.upvotes}}</a>
+		<a ng-click="incrementDownvotes(comment)"><span class="glyphicon glyphicon-thumbs-down"></span>{{comment.downvotes}}</a>
+		 - by {{comment.author}}
+		<span>{{comment.body}}</span>
 	</div>
-	<!-- post template -->
 
 	<form ng-submit="addComment()" ng-show="isLoggedIn()" style="margin-top:30px;">
 		<h3>Add a new comment</h3>

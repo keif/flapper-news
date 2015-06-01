@@ -9,16 +9,19 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 require('./models/Posts');
 require('./models/Comments');
+require('./models/Votes');
 require('./models/Users');
 require('./config/passport');
 
 var mongoURI = 'mongodb://localhost:27017/news';
 var MongoDB = mongoose.connect(mongoURI).connection;
+
 MongoDB.on('error', function(err) {
 	console.log(err.message);
 });
+
 MongoDB.once('open', function() {
-	console.log("mongodb connection open");
+	console.log('mongodb connection open');
 });
 
 var routes = require('./routes/index');

@@ -6,11 +6,39 @@ var jwt = require('express-jwt');
 var router = express.Router();
 var Post = mongoose.model('Post');
 var Comment = mongoose.model('Comment');
+var Vote = mongoose.model('Vote');
 var User = mongoose.model('User');
 var auth = jwt({
 	secret: 'SECRET',
 	userProperty: 'payload'
 });
+
+var vote = function (req, res, next, num) {
+	var post = req.post,
+		payload = req.payload;
+
+	console.log("---- REQ POST -----");
+	console.log(post);
+
+	console.log("---- VOTE OBJ :: POST -----");
+	var vote = new Vote(req.body);
+	console.log(typeof post.__v, post.__v);
+	console.log(typeof num, num);
+	vote.user_id = payload._id, // user id
+	vote.post_id = post._id, // comment or post id
+	vote.comment_id = null, // comment or post id
+	vote.vote = parseInt(post.__v, 10) * parseInt(num, 10);
+
+	vote.save(function(err, vote){
+		if (err) {
+			console.error(err);
+			return next(err);
+		}
+		console.log(vote);
+		// res.json(vote);
+		// next();
+	});
+};
 
 // GET home page.
 router.get('/', function (req, res, next) {
@@ -21,7 +49,7 @@ router.get('/', function (req, res, next) {
 
 // preload comments object
 router.param('comment', function (req, res, next, id) {
-	var query = Comments.findById(id);
+	var query = Comment.findById(id);
 
 	query.exec(function (err, post) {
 		if (err) {
@@ -117,12 +145,46 @@ router.get('/posts/:post', function(req, res) {
 	});
 });
 
+// DELETE post
+router.delete('/posts/:post', auth, function(req, res) {
+	// remove all comments for :post
+	req.post.comments.forEach(function(id) {
+		Comment.remove({
+			_id: id
+		}, function (err) {
+			if (err) {
+				return next(err);
+			}
+		});
+	});
+
+	// remove :post
+	Post.remove({
+		_id: id
+	}, function (err, post) {
+		if (err) {
+			return next(err);
+		}
+
+		// refresh Post by getting and returning the Posts
+		Post.find(function(err, posts) {
+			if (err) {
+				return next(err);
+			}
+
+			res.json(posts);
+		});
+	});
+});
+
 // PUT downvote call for POST ID
 router.put('/posts/:post/downvote', auth, function(req, res, next) {
 	req.post.downvote(function (err, post) {
 		if (err) {
 			return next(err);
 		}
+
+		vote(req, res, next, -1);
 
 		res.json(post);
 	});
@@ -134,6 +196,8 @@ router.put('/posts/:post/upvote', auth, function(req, res, next) {
 		if (err) {
 			return next(err);
 		}
+
+		vote(req, res, next, 1);
 
 		res.json(post);
 	});
@@ -168,6 +232,8 @@ router.put('/posts/:post/comments/:comment/downvote', auth, function(req, res, n
 			return next(err);
 		}
 
+		vote(req, res, next, -1);
+
 		res.json(post);
 	});
 });
@@ -178,6 +244,8 @@ router.put('/posts/:post/comments/:comment/upvote', auth, function(req, res, nex
 		if (err) {
 			return next(err);
 		}
+
+		vote(req, res, next, 1);
 
 		res.json(post);
 	});
@@ -206,6 +274,25 @@ router.post('/register', function (req, res, next) {
 			token: user.generateJWT()
 		});
 	});
+});
+
+// preload comments object
+router.param('vote', function (req, res, next, id) {
+	var query = Vote.findById(id);
+
+	query.exec(function (err, post) {
+		if (err) {
+			return next(err);
+		}
+
+		if (!post) {
+			return next(new Error('can\'t find comment'));
+		}
+
+		req.post = post;
+
+		return next();
+	})
 });
 
 module.exports = router;
