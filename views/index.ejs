@@ -91,17 +91,29 @@
 	<div class="page-header">
 		<h1><a href="#/" title="Flapper News">Flapper News</a></h1>
 	</div>
-	<div class="page-header">
-		<h3>
-			<a ng-show="post.link" href="{{post.link}}">{{post.title}}</a>
-			<span ng-hide="post.link">{{post.title}}</span>
-		</h3>
-	</div>
-	<div class="comment" ng-repeat="comment in post.comments | orderBy:'-upvotes'">
-		<a ng-click="incrementUpvotes(comment)"><span class="glyphicon glyphicon-thumbs-up"></span>{{comment.upvotes}}</a>
-		<a ng-click="incrementDownvotes(comment)"><span class="glyphicon glyphicon-thumbs-down"></span>{{comment.downvotes}}</a>
-		 - by {{comment.author}}
-		<span>{{comment.body}}</span>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<div class="buttons" style="float: left; margin-right: 15px;">
+				<a class="btn btn-primary btn-xs" ng-show="post.upvotes >= post.downvotes" ng-click="incrementUpvotes(post)"><span class="glyphicon glyphicon-thumbs-up"></span>{{post.upvotes}}</a>
+				<a class="btn btn-default btn-xs" ng-show="post.upvotes >= post.downvotes" ng-click="incrementDownvotes(post)"><span class="glyphicon glyphicon-thumbs-down"></span>{{post.downvotes}}</a>
+				<a class="btn btn-default btn-xs" ng-show="post.downvotes > post.upvotes" ng-click="incrementUpvotes(post)"><span class="glyphicon glyphicon-thumbs-up"></span>{{post.upvotes}}</a>
+				<a class="btn btn-primary btn-xs" ng-show="post.downvotes > post.upvotes" ng-click="incrementDownvotes(post)"><span class="glyphicon glyphicon-thumbs-down"></span>{{post.downvotes}}</a>
+			</div>
+			<h3 class="panel-title">
+				<a ng-show="post.link" href="{{post.link}}">{{post.title}}</a>
+				<span ng-hide="post.link">{{post.title}}</span>
+			</h3>
+		</div>
+
+		<!-- show all comments, sorted by upvotes -->
+		<div class="panel-body comment" ng-repeat="comment in post.comments | orderBy:'-upvotes'">
+			<a class="btn btn-primary btn-xs" ng-show="comment.upvotes >= comment.downvotes" ng-click="incrementUpvotes(comment)"><span class="glyphicon glyphicon-thumbs-up"></span>{{comment.upvotes}}</a>
+			<a class="btn btn-default btn-xs" ng-show="comment.upvotes >= comment.downvotes" ng-click="incrementDownvotes(comment)"><span class="glyphicon glyphicon-thumbs-down"></span>{{comment.downvotes}}</a>
+			<a class="btn btn-default btn-xs" ng-show="comment.downvotes > comment.upvotes" ng-click="incrementUpvotes(comment)"><span class="glyphicon glyphicon-thumbs-up"></span>{{comment.upvotes}}</a>
+			<a class="btn btn-primary btn-xs" ng-show="comment.downvotes > comment.upvotes" ng-click="incrementDownvotes(comment)"><span class="glyphicon glyphicon-thumbs-down"></span>{{comment.downvotes}}</a>
+			 - by {{comment.author}}:
+			<span>{{comment.body}}</span>
+		</div>
 	</div>
 
 	<form class="form-add-comment" ng-submit="addComment()" ng-show="isLoggedIn()">
