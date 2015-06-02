@@ -124,6 +124,7 @@ router.post('/posts', auth, function(req, res, next) {
 	var post = new Post(req.body);
 
 	post.author = req.payload.username;
+	post.author_id = req.payload._id;
 
 	post.save(function(err, post){
 		if (err) {
@@ -147,33 +148,47 @@ router.get('/posts/:post', function(req, res) {
 
 // DELETE post
 router.delete('/posts/:post', auth, function(req, res) {
-	// remove all comments for :post
-	req.post.comments.forEach(function(id) {
-		Comment.remove({
-			_id: id
-		}, function (err) {
-			if (err) {
-				return next(err);
-			}
-		});
-	});
+	var query = Post.findById(req.params.post);
 
-	// remove :post
-	Post.remove({
-		_id: id
-	}, function (err, post) {
+	query.exec(function (err, post) {
 		if (err) {
 			return next(err);
 		}
 
-		// refresh Post by getting and returning the Posts
-		Post.find(function(err, posts) {
-			if (err) {
-				return next(err);
-			}
+		if (!post) {
+			return next(new Error('can\'t find post'));
+		}
 
-			res.json(posts);
-		});
+		if (req.payload._id === post.author_id.toString()) {
+			// remove all comments for :post
+			req.post.comments.forEach(function(id) {
+				Comment.remove({
+					_id: id
+				}, function (err) {
+					if (err) {
+						return next(err);
+					}
+				});
+			});
+
+			// remove :post
+			Post.remove({
+				_id: req.params.post
+			}, function (err, post) {
+				if (err) {
+					return next(err);
+				}
+
+				// refresh Post by getting and returning the Posts
+				Post.find(function(err, posts) {
+					if (err) {
+						return next(err);
+					}
+
+					res.json(posts);
+				});
+			});
+		}
 	});
 });
 
@@ -208,6 +223,7 @@ router.post('/posts/:post/comments', auth, function(req, res, next) {
 	var comment = new Comment(req.body);
 	comment.post = req.post;
 	comment.author = req.payload.username;
+	comment.author_id = req.payload._id;
 
 	comment.save(function (err, comment) {
 		if (err) {

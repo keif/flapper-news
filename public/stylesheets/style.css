@@ -2,24 +2,24 @@
 .glyphicon-thumbs-down,
 .glyphicon-thumbs-up {
 	cursor: pointer;
-}
-
-/* post display area */
-.delete {
-	float: right;
+	margin-right: 5px;
 }
 
 /* form submit area */
-.form-add-post,
-.form-add-login {
+form {
 	margin-top: 30px;
+}
+
+/* view all posts */
+.posts {
+	margin-bottom: 10px;
+}
+.posts a {
+	min-width: 65px;
 }
 
 /* comment area */
 .comment {
-
 }
 .comment span {
-	font-size: 20px;
-	margin-left: 10px;
 }

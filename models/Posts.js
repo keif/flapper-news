@@ -2,6 +2,10 @@ var mongoose = require('mongoose');
 
 var PostSchema = new mongoose.Schema({
 	author: String,
+	author_id: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Users'
+	},
 	link: String,
 	title: String,
 	downvotes: {

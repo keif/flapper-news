@@ -6,15 +6,15 @@ var mongoose = require('mongoose');
 // vote determines whether this vote was up or down.
 var VoteSchema = new mongoose.Schema({
 	user_id:  {
-		type: 'ObjectId',
+		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Users'
 	}, // user id
 	post_id: {
-		type: 'ObjectId',
+		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Posts'
 	}, // comment or post id
 	comment_id: {
-		type: 'ObjectId',
+		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Comments'
 	}, // comment or post id
 	vote: Number // vote -1/0/1

@@ -76,7 +76,7 @@ app.factory('posts', ['$http', 'auth', function ($http, auth) {
 
 	// delete single post
 	o.delete = function(post) {
-		return $http.delete('/posts/' + post._id, null, {
+		return $http.delete('/posts/' + post._id, {
 			headers: {
 				Authorization: 'Bearer ' + auth.getToken()
 			}
@@ -159,8 +159,29 @@ app.factory('auth', ['$http', '$window', function ($http, $window) {
 		}
 	};
 
+	auth.currentUserId = function () {
+		if (auth.isLoggedIn()) {
+			var token = auth.getToken();
+			var payload = JSON.parse($window.atob(token.split('.')[1]));
+
+			return payload._id;
+		}
+	};
+
 	auth.getToken = function () {
 		return $window.localStorage['flapper-news-token'];
+	};
+
+	auth.isCurrentUser = function (user) {
+		var token = auth.getToken();
+
+		if (token) {
+			var payload = JSON.parse($window.atob(token.split('.')[1]));
+
+			return (auth.currentUserId() === payload._id);
+		} else {
+			return false;
+		}
 	};
 
 	auth.isLoggedIn = function () {
@@ -205,29 +226,27 @@ app.controller('MainCtrl', [
 	function ($scope, posts, auth) {
 		$scope.isLoggedIn = auth.isLoggedIn;
 		$scope.posts = posts.posts;
-
 		$scope.addPost = function () {
 			if (!$scope.title || $scope.title === '')  {
 				return;
 			}
 
-			$scope.posts.push({
-				title: $scope.title,
-				link: $scope.link,
-				downvotes: 0,
-				upvotes: 0
-			});
 			posts.create({
 				title: $scope.title,
 				link: $scope.link
 			});
+
 			$scope.title = '';
 			$scope.link = '';
 		};
 
-		$scope.deletePost = function(post) {
+		$scope.isCurrentUser = function (post) {
+			return (post.author_id === auth.currentUserId());
+		};
+
+		$scope.deletePost = function (post) {
 			posts.delete(post);
-		}
+		};
 
 		$scope.incrementDownvotes = function (post) {
 			posts.downvote(post);
@@ -255,6 +274,7 @@ app.controller('AuthCtrl', [
 					$state.go('home');
 				});
 		};
+
 		$scope.logIn = function () {
 			auth.logIn($scope.user)
 				.error(function (error) {
@@ -271,8 +291,8 @@ app.controller('NavCtrl', [
 	'$scope',
 	'auth',
 	function ($scope, auth) {
-		$scope.isLoggedIn = auth.isLoggedIn;
 		$scope.currentUser = auth.currentUser;
+		$scope.isLoggedIn = auth.isLoggedIn;
 		$scope.logOut = auth.logOut;
 	}
 ]);
