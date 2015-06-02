@@ -75,7 +75,7 @@ app.factory('posts', ['$http', 'auth', function ($http, auth) {
 	};
 
 	// delete single post
-	o.delete = function(post) {
+	o.delete = function (post) {
 		return $http.delete('/posts/' + post._id, {
 			headers: {
 				Authorization: 'Bearer ' + auth.getToken()
@@ -86,7 +86,7 @@ app.factory('posts', ['$http', 'auth', function ($http, auth) {
 		});
 	};
 
-	o.downvote = function(post) {
+	o.downvote = function (post) {
 		return $http.put('/posts/' + post._id + '/downvote', null, {
 			headers: {
 				Authorization: 'Bearer ' + auth.getToken()
@@ -108,7 +108,7 @@ app.factory('posts', ['$http', 'auth', function ($http, auth) {
 		});
 	};
 
-	o.get = function(id) {
+	o.get = function (id) {
 		return $http.get('/posts/' + id)
 			.then(function(res){
 				return res.data;
@@ -122,7 +122,7 @@ app.factory('posts', ['$http', 'auth', function ($http, auth) {
 			});
 	};
 
-	o.upvote = function(post) {
+	o.upvote = function (post) {
 		return $http.put('/posts/' + post._id + '/upvote', null, {
 			headers: {
 				Authorization: 'Bearer ' + auth.getToken()
@@ -226,6 +226,7 @@ app.controller('MainCtrl', [
 	function ($scope, posts, auth) {
 		$scope.isLoggedIn = auth.isLoggedIn;
 		$scope.posts = posts.posts;
+
 		$scope.addPost = function () {
 			if (!$scope.title || $scope.title === '')  {
 				return;
