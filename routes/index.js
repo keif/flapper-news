@@ -28,8 +28,8 @@ var vote = function (req, res, next, num) {
 	payload = req.payload;
 	voteObj = {
 		user_id: mongoose.Types.ObjectId(payload._id), // user id
-		post_id: post._id, // comment or post id
-		comment_id: null // comment or post id
+		post_id: (post.type === 'post') ? post._id : null,
+		comment_id: (post.type === 'comment') ? post._id : null
 	},
 	num = parseInt(num, 10);
 
@@ -57,11 +57,6 @@ var vote = function (req, res, next, num) {
 				var upvote = (num === 1);
 				var downvote = (num === -1);
 
-				console.log("hasUpvote:", hasUpvote);
-				console.log("hasDownvote:", hasDownvote);
-				console.log("upvote:", upvote);
-				console.log("downvote:", downvote);
-
 				if (hasUpvote) {
 					if (upvote) {
 						newUpvote = -1;
@@ -84,8 +79,6 @@ var vote = function (req, res, next, num) {
 					newDownvote = (downvote) ? num : 0;
 				}
 
-				console.log("newUpvote:", newUpvote);
-				console.log("newDownvote:", newDownvote);
 				req.post.upvote(newUpvote, function (err, post) {
 					if (err) {
 						return next(err);
@@ -96,7 +89,6 @@ var vote = function (req, res, next, num) {
 							return next(err);
 						}
 
-						console.log(post);
 						res.json(post);
 					});
 				});
@@ -104,13 +96,12 @@ var vote = function (req, res, next, num) {
 		} else {
 			var newVote = new Vote();
 			newVote.user_id = payload._id, // user id
-			newVote.post_id = post._id, // comment or post id
-			newVote.comment_id = null, // comment or post id
+			newVote.post_id = (post.type === 'post') ? post._id : null,
+			newVote.comment_id = (post.type === 'comment') ? post._id : null,
 			newVote.vote = parseInt(num, 10);
 
 			newVote.save(function(err, vote){
 				if (err) {
-					console.error(err);
 					return next(err);
 				}
 
@@ -322,28 +313,11 @@ router.post('/posts/:post/comments', auth, function(req, res, next) {
 
 // PUT downvote call for POST ID COMMENT ID
 router.put('/posts/:post/comments/:comment/downvote', auth, function(req, res, next) {
-	req.post.downvote(function (err, post) {
-		if (err) {
-			return next(err);
-		}
-
-		vote(req, res, next, -1);
-
-		res.json(post);
-	});
+	vote(req, res, next, -1);
 });
 
 // PUT upvote call for POST ID COMMENT ID
 router.put('/posts/:post/comments/:comment/upvote', auth, function(req, res, next) {
-	// req.post.upvote(function (err, post) {
-	// 	if (err) {
-	// 		return next(err);
-	// 	}
-
-	// 	vote(req, res, next, 1);
-
-	// 	res.json(post);
-	// });
 	vote(req, res, next, 1);
 });
 

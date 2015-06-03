@@ -22,13 +22,13 @@ var CommentSchema = new mongoose.Schema({
 	}
 });
 
-CommentSchema.methods.downvote = function (cb) {
-	this.downvotes += 1;
+CommentSchema.methods.downvote = function (num, cb) {
+	this.downvotes += num;
 	this.save(cb);
 };
 
-CommentSchema.methods.upvote = function (cb) {
-	this.upvotes += 1;
+CommentSchema.methods.upvote = function (num, cb) {
+	this.upvotes += num;
 	this.save(cb);
 };
 

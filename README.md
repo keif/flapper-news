@@ -12,3 +12,9 @@ https://thinkster.io/mean-stack-tutorial/
  Todo:
  - on submission, generate a positive vote tied to submitter
  - comment voting to match post voting (unique voting)
+ - comment deletion
+ - when deleting post from post page, reload the page to return to the home page
+ - grunt/gulp tasks
+ - refactor CSS/JS files for grunt/gulp
+ - user profiles
+ - user roles (admin, user)

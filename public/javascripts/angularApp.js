@@ -153,8 +153,8 @@ app.factory('posts', [
 				}
 			})
 			.success(function (data) {
-				console.log(data);
-				comment.downvotes += 1;
+				comment.upvotes = data.upvotes;
+				comment.downvotes = data.downvotes;
 			});
 		};
 
@@ -165,8 +165,8 @@ app.factory('posts', [
 				}
 			})
 			.success(function (data) {
-				console.log(data);
-				comment.upvotes += 1;
+				comment.upvotes = data.upvotes;
+				comment.downvotes = data.downvotes;
 			});
 		};
 
@@ -364,22 +364,18 @@ app.controller('PostsCtrl', [
 		};
 
 		$scope.incrementPostDownvotes = function (post) {
-			console.log(post);
 			posts.downvote(post);
 		};
 
 		$scope.incrementPostUpvotes = function (post) {
-			console.log(post);
 			posts.upvote(post);
 		};
 
 		$scope.incrementCommentDownvotes = function (comment) {
-			console.log(comment);
 			posts.downvoteComment(post, comment);
 		};
 
 		$scope.incrementCommentUpvotes = function (comment) {
-			console.log(comment);
 			posts.upvoteComment(post, comment);
 		};
 	}
