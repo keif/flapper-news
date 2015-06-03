@@ -1,6 +1,10 @@
 var mongoose = require('mongoose');
 
 var CommentSchema = new mongoose.Schema({
+	type: {
+		type: String,
+		default: 'comment'
+	},
 	body: String,
 	author: String,
 	downvotes: {

@@ -14,8 +14,8 @@
 			<ul class="nav navbar-nav">
 				<li ng-show="isLoggedIn()"><a>{{ currentUser() }}</a></li>
 				<li ng-show="isLoggedIn()"><a href="" ng-click="logOut()">Log Out</a></li>
-				<li ng-hide="isLoggedIn()"><a href="/#/login">Log In</a></li>
-				<li ng-hide="isLoggedIn()"><a href="/#/register">Register</a></li>
+				<li ng-hide="isLoggedIn()"><a ui-sref="login">Log In</a></li>
+				<li ng-hide="isLoggedIn()"><a ui-sref="register">Register</a></li>
 			</ul>
 		</nav>
 		<div class="row">
@@ -27,7 +27,7 @@
 	<script type="text/ng-template" id="/home.html">
 	<!-- Template: Homepage -->
 	<div class="page-header">
-		<h1><a href="#/" title="Flapper News">Flapper News</a></h1>
+		<h1><a ui-sref="home" title="Flapper News">Flapper News</a></h1>
 	</div>
 
 	<!-- show all posts, sorted by upvotes -->
@@ -59,13 +59,13 @@
 		<button type="submit" class="btn btn-primary">Post</button>
 	</form>
 	<div ng-hide="isLoggedIn()">
-		<h3>You need to <a href="/#/login">Log In</a> or <a href="/#/register">Register</a> before you can add a post.</h3>
+		<h3>You need to <a ui-sref="login">Log In</a> or <a ui-sref="register">Register</a> before you can add a post.</h3>
 	</div>
 	</script>
 	<script type="text/ng-template" id="/login.html">
 	<!-- Template: login -->
 	<div class="page-header">
-		<h1><a href="#/" title="Flapper News">Flapper News</a></h1>
+		<h1><a ui-sref="home" title="Flapper News">Flapper News</a></h1>
 	</div>
 
 	<div ng-show="error" class="alert alert-danger row" role="alert">
@@ -87,24 +87,28 @@
 	<script type="text/ng-template" id="/posts.html">
 	<!-- Template: post -->
 	<div class="page-header">
-		<h1><a href="#/" title="Flapper News">Flapper News</a></h1>
+		<h1><a ui-sref="home" title="Flapper News">Flapper News</a></h1>
 	</div>
 	<div class="panel panel-default">
+		<!-- single post view -->
 		<div class="panel-heading">
 			<div class="buttons" style="float: left; margin-right: 15px;">
-				<a class="btn btn-success btn-xs" ng-click="incrementUpvotes(post)"><span class="glyphicon glyphicon-thumbs-up"></span>{{post.upvotes}}</a>
-				<a class="btn btn-danger btn-xs" ng-click="incrementDownvotes(post)"><span class="glyphicon glyphicon-thumbs-down"></span>{{post.downvotes}}</a>
+				<a class="btn btn-success btn-xs" ng-click="incrementPostUpvotes(post)"><span class="glyphicon glyphicon-thumbs-up"></span>{{post.upvotes}}</a>
+				<a class="btn btn-danger btn-xs" ng-click="incrementPostDownvotes(post)"><span class="glyphicon glyphicon-thumbs-down"></span>{{post.downvotes}}</a>
 			</div>
 			<h3 class="panel-title">
 				<a ng-show="post.link" href="{{post.link}}">{{post.title}}</a>
 				<span ng-hide="post.link">{{post.title}}</span>
+
+				<!-- Link for deleting post-->
+				<a href="#" class="btn btn-danger btn-xs pull-right" ng-show="isCurrentUser(post)" ng-click="deletePost(post)"><i class="icon-trash icon-white"></i> Delete </a>
 			</h3>
 		</div>
 
 		<!-- show all comments, sorted by upvotes -->
 		<div class="panel-body comment" ng-repeat="comment in post.comments | orderBy:'-upvotes'">
-			<a class="btn btn-success btn-xs" ng-click="incrementUpvotes(comment)"><span class="glyphicon glyphicon-thumbs-up"></span>{{comment.upvotes}}</a>
-			<a class="btn btn-danger btn-xs" ng-click="incrementDownvotes(comment)"><span class="glyphicon glyphicon-thumbs-down"></span>{{comment.downvotes}}</a>
+			<a class="btn btn-success btn-xs" ng-click="incrementCommentUpvotes(comment)"><span class="glyphicon glyphicon-thumbs-up"></span>{{comment.upvotes}}</a>
+			<a class="btn btn-danger btn-xs" ng-click="incrementCommentDownvotes(comment)"><span class="glyphicon glyphicon-thumbs-down"></span>{{comment.downvotes}}</a>
 			 - by {{comment.author}}:
 			<span>{{comment.body}}</span>
 		</div>
@@ -118,13 +122,13 @@
 		<button type="submit" class="btn btn-primary">Post</button>
 	</form>
 	<div ng-hide="isLoggedIn()">
-		<h3>You need to <a href="/#/login">Log In</a> or <a href="/#/register">Register</a> before you can comment.</h3>
+		<h3>You need to <a ui-sref="login">Log In</a> or <a ui-sref="register">Register</a> before you can comment.</h3>
 	</div>
 	</script>
 	<script type="text/ng-template" id="/register.html">
 	<!-- Template: register -->
 	<div class="page-header">
-		<h1><a href="#/" title="Flapper News">Flapper News</a></h1>
+		<h1><a ui-sref="home" title="Flapper News">Flapper News</a></h1>
 	</div>
 
 	<div ng-show="error" class="alert alert-danger row">

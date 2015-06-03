@@ -1,6 +1,10 @@
 var mongoose = require('mongoose');
 
 var PostSchema = new mongoose.Schema({
+	type: {
+		type: String,
+		default: 'post'
+	},
 	author: String,
 	author_id: {
 		type: mongoose.Schema.Types.ObjectId,

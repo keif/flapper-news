@@ -8,3 +8,7 @@ https://thinkster.io/mean-stack-tutorial/
  - AngularJS v1.3.10
  - Node.js v0.10.31
  - MongoDB 2.6.7
+
+ Todo:
+ - on submission, generate a positive vote tied to submitter
+ - comment voting to match post voting (unique voting)
