@@ -4,39 +4,125 @@ var passport = require('passport');
 var jwt = require('express-jwt');
 
 var router = express.Router();
+
+// models
 var Post = mongoose.model('Post');
 var Comment = mongoose.model('Comment');
 var Vote = mongoose.model('Vote');
 var User = mongoose.model('User');
+
+// token/auth
 var auth = jwt({
 	secret: 'SECRET',
 	userProperty: 'payload'
 });
 
+// has to be a better way to do this, right?
 var vote = function (req, res, next, num) {
-	var post = req.post,
-		payload = req.payload;
+	var post,
+		payload,
+		voteObj = {},
+		query;
 
-	console.log("---- REQ POST -----");
-	console.log(post);
+	post = req.post;
+	payload = req.payload;
+	voteObj = {
+		user_id: mongoose.Types.ObjectId(payload._id), // user id
+		post_id: post._id, // comment or post id
+		comment_id: null // comment or post id
+	},
+	num = parseInt(num, 10);
 
-	console.log("---- VOTE OBJ :: POST -----");
-	var vote = new Vote(req.body);
-	console.log(typeof post.__v, post.__v);
-	console.log(typeof num, num);
-	vote.user_id = payload._id, // user id
-	vote.post_id = post._id, // comment or post id
-	vote.comment_id = null, // comment or post id
-	vote.vote = parseInt(post.__v, 10) * parseInt(num, 10);
-
-	vote.save(function(err, vote){
+	query = Vote.find(voteObj).limit(1);
+	query.exec(function (err, vote) {
 		if (err) {
-			console.error(err);
 			return next(err);
 		}
-		console.log(vote);
-		// res.json(vote);
-		// next();
+
+		if (vote.length) {
+			var originalVote = vote[0].vote;
+
+			Vote.update(voteObj, {
+				vote: (vote[0].vote === num) ? 0 : num
+			}, function (err, numAffected, raw) {
+				if (err) {
+					return next(err);
+				}
+
+				// default
+				var newUpvote = 0;
+				var newDownvote = 0;
+				var hasUpvote = (originalVote === 1);
+				var hasDownvote = (originalVote === -1);
+				var upvote = (num === 1);
+				var downvote = (num === -1);
+
+				console.log("hasUpvote:", hasUpvote);
+				console.log("hasDownvote:", hasDownvote);
+				console.log("upvote:", upvote);
+				console.log("downvote:", downvote);
+
+				if (hasUpvote) {
+					if (upvote) {
+						newUpvote = -1;
+						newDownvote = 0;
+					} else if (downvote) {
+						newUpvote = -1;
+						newDownvote = 1;
+					}
+				} else if (hasDownvote) {
+					if (upvote) {
+						newUpvote = 1;
+						newDownvote = -1;
+					} else if (downvote) {
+						newUpvote = 0;
+						newDownvote = -1;
+					}
+				// is zero
+				} else {
+					newUpvote = (upvote) ? num : 0;
+					newDownvote = (downvote) ? num : 0;
+				}
+
+				console.log("newUpvote:", newUpvote);
+				console.log("newDownvote:", newDownvote);
+				req.post.upvote(newUpvote, function (err, post) {
+					if (err) {
+						return next(err);
+					}
+
+					req.post.downvote(newDownvote, function (err, post) {
+						if (err) {
+							return next(err);
+						}
+
+						console.log(post);
+						res.json(post);
+					});
+				});
+			});
+		} else {
+			var newVote = new Vote();
+			newVote.user_id = payload._id, // user id
+			newVote.post_id = post._id, // comment or post id
+			newVote.comment_id = null, // comment or post id
+			newVote.vote = parseInt(num, 10);
+
+			newVote.save(function(err, vote){
+				if (err) {
+					console.error(err);
+					return next(err);
+				}
+
+				req.post[(vote.vote === 1) ? 'upvote' : 'downvote'](vote.vote, function (err, post) {
+					if (err) {
+						return next(err);
+					}
+
+					res.json(post);
+				});
+			});
+		}
 	});
 };
 
@@ -63,7 +149,7 @@ router.param('comment', function (req, res, next, id) {
 		req.post = post;
 
 		return next();
-	})
+	});
 });
 
 // POST login authentication for the user and returns token
@@ -171,6 +257,15 @@ router.delete('/posts/:post', auth, function(req, res) {
 				});
 			});
 
+			// remove vote information
+			Vote.remove({
+				post_id: req.params.post
+			}, function (err, vote) {
+				if (err) {
+					return next(err);
+				}
+			});
+
 			// remove :post
 			Post.remove({
 				_id: req.params.post
@@ -194,28 +289,12 @@ router.delete('/posts/:post', auth, function(req, res) {
 
 // PUT downvote call for POST ID
 router.put('/posts/:post/downvote', auth, function(req, res, next) {
-	req.post.downvote(function (err, post) {
-		if (err) {
-			return next(err);
-		}
-
-		vote(req, res, next, -1);
-
-		res.json(post);
-	});
+	vote(req, res, next, -1);
 });
 
 // PUT upvote call for POST ID
 router.put('/posts/:post/upvote', auth, function(req, res, next) {
-	req.post.upvote(function (err, post) {
-		if (err) {
-			return next(err);
-		}
-
-		vote(req, res, next, 1);
-
-		res.json(post);
-	});
+	vote(req, res, next, 1);
 });
 
 // POST comment for POST ID
@@ -256,15 +335,16 @@ router.put('/posts/:post/comments/:comment/downvote', auth, function(req, res, n
 
 // PUT upvote call for POST ID COMMENT ID
 router.put('/posts/:post/comments/:comment/upvote', auth, function(req, res, next) {
-	req.post.upvote(function (err, post) {
-		if (err) {
-			return next(err);
-		}
+	// req.post.upvote(function (err, post) {
+	// 	if (err) {
+	// 		return next(err);
+	// 	}
 
-		vote(req, res, next, 1);
+	// 	vote(req, res, next, 1);
 
-		res.json(post);
-	});
+	// 	res.json(post);
+	// });
+	vote(req, res, next, 1);
 });
 
 // POST register user with password

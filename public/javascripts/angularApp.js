@@ -93,18 +93,20 @@ app.factory('posts', ['$http', 'auth', function ($http, auth) {
 			}
 		})
 		.success(function (data) {
+			post.upvotes = data.upvotes;
 			post.downvotes = data.downvotes;
 		});
 	};
 
-	o.downvoteComment = function (post, comment) {
-		return $http.put('/posts/' + post._id + '/comments/' + comment._id + '/downvote', null, {
+	o.upvote = function (post) {
+		return $http.put('/posts/' + post._id + '/upvote', null, {
 			headers: {
 				Authorization: 'Bearer ' + auth.getToken()
 			}
 		})
 		.success(function (data) {
-			comment.downvotes += 1;
+			post.upvotes = data.upvotes;
+			post.downvotes = data.downvotes;
 		});
 	};
 
@@ -122,14 +124,14 @@ app.factory('posts', ['$http', 'auth', function ($http, auth) {
 			});
 	};
 
-	o.upvote = function (post) {
-		return $http.put('/posts/' + post._id + '/upvote', null, {
+	o.downvoteComment = function (post, comment) {
+		return $http.put('/posts/' + post._id + '/comments/' + comment._id + '/downvote', null, {
 			headers: {
 				Authorization: 'Bearer ' + auth.getToken()
 			}
 		})
 		.success(function (data) {
-			post.upvotes = data.upvotes;
+			comment.downvotes += 1;
 		});
 	};
 

@@ -25,13 +25,13 @@ var PostSchema = new mongoose.Schema({
 	]
 });
 
-PostSchema.methods.downvote = function (cb) {
-	this.downvotes += 1;
+PostSchema.methods.downvote = function (num, cb) {
+	this.downvotes += num;
 	this.save(cb);
 };
 
-PostSchema.methods.upvote = function (cb) {
-	this.upvotes += 1;
+PostSchema.methods.upvote = function (num, cb) {
+	this.upvotes += num;
 	this.save(cb);
 };
 
